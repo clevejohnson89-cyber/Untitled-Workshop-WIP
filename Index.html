@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>LimitedScouter Pro</title>
+    <style>
+        body {
+            background-color: #0f1117;
+            color: white;
+            font-family: Arial;
+        }
+        .container {
+            width: 90%;
+            margin: auto;
+        }
+        h1 {
+            text-align: center;
+            color: #00ffcc;
+        }
+        .filters {
+            margin-bottom: 20px;
+            padding: 10px;
+            background: #1c1f26;
+            border-radius: 10px;
+        }
+        input, select, button {
+            padding: 8px;
+            margin: 5px;
+            border-radius: 5px;
+            border: none;
+        }
+        button {
+            background: #00ffcc;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 10px;
+            text-align: center;
+        }
+        th {
+            background: #1c1f26;
+        }
+        tr:nth-child(even) {
+            background: #1a1d24;
+        }
+        .good {
+            color: #00ff66;
+            font-weight: bold;
+        }
+        .bad {
+            color: #ff4d4d;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>LimitedScouter Pro</h1>
+
+    <div class="filters">
+        Min Price: <input type="number" id="minPrice" value="0">
+        Max Price: <input type="number" id="maxPrice" value="1000">
+
+        Type:
+        <select id="itemType">
+            <option value="all">All</option>
+            <option value="classic">Classic Roblox</option>
+            <option value="ugc">UGC Limited</option>
+        </select>
+
+        <button onclick="filterItems()">Scan Market</button>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Type</th>
+                <th>Price</th>
+                <th>RAP</th>
+                <th>Trend %</th>
+                <th>Volume</th>
+                <th>Favorites</th>
+                <th>Trade Score</th>
+            </tr>
+        </thead>
+        <tbody id="results"></tbody>
+    </table>
+</div>
+
+<script>
+const items = [
+    {name:"Red Plaid Golf Cap", type:"classic", price:450, rap:890, trend:13, volume:27, fav:16400},
+    {name:"Snowped", type:"classic", price:380, rap:740, trend:9, volume:19, fav:8300},
+    {name:"Gold Faucet Crown", type:"ugc", price:770, rap:840, trend:17, volume:22, fav:13900},
+    {name:"Silver Viking Horns", type:"classic", price:520, rap:680, trend:8, volume:15, fav:11200},
+    {name:"Blue Tracker Cap", type:"ugc", price:310, rap:560, trend:10, volume:14, fav:10700},
+    {name:"Crimson Star Shades", type:"ugc", price:600, rap:950, trend:15, volume:30, fav:21000}
+];
+
+function calculateScore(item){
+    let rapSpread = item.rap - item.price;
+    return (item.trend * 2) + item.volume + (rapSpread / 10);
+}
+
+function filterItems(){
+    let min = parseInt(document.getElementById("minPrice").value);
+    let max = parseInt(document.getElementById("maxPrice").value);
+    let type = document.getElementById("itemType").value;
+
+    let filtered = items.filter(item => 
+        item.price >= min && 
+        item.price <= max &&
+        (type === "all" || item.type === type)
+    );
+
+    filtered.sort((a,b)=> calculateScore(b)-calculateScore(a));
+
+    let output = "";
+    filtered.forEach(item => {
+        let score = calculateScore(item).toFixed(1);
+        output += `
+        <tr>
+            <td>${item.name}</td>
+            <td>${item.type}</td>
+            <td>${item.price}</td>
+            <td>${item.rap}</td>
+            <td class="${item.trend>10?'good':''}">${item.trend}%</td>
+            <td>${item.volume}/day</td>
+            <td>${item.fav}</td>
+            <td class="${score>40?'good':''}">${score}</td>
+        </tr>`;
+    });
+
+    document.getElementById("results").innerHTML = output;
+}
+
+filterItems();
+</script>
+</body>
+</html>
